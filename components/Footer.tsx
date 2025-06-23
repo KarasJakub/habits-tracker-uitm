@@ -1,13 +1,22 @@
 import React from "react"
-import { Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
+
+const styles = StyleSheet.create({
+  footer: {
+    padding: 16,
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#666",
+    fontSize: 14,
+  },
+})
 
 export default function Footer() {
   return (
-    <View
-      className="p-4 bg-gray-100 items-center text-center"
-      style={{ alignContent: "center" }}
-    >
-      <Text className="text-gray-600">Jakub Karaś — nr albumu: 70844</Text>
+    <View style={styles.footer}>
+      <Text style={styles.footerText}>Jakub Karaś — nr albumu: 70844</Text>
     </View>
   )
 }
