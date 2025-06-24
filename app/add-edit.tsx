@@ -1,45 +1,78 @@
-// import DateTimePicker from "@react-native-community/datetimepicker"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import React, { useState } from "react"
-import { Button, StyleSheet, TextInput, View } from "react-native"
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native"
 // import uuid from "react-native-uuid"
 import { Habit } from "../storage/habitsStorage"
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#fff",
+    padding: 16,
+    marginTop: 50,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
+  label: {
     fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+    marginTop: 12,
     color: "#333",
   },
-  datePicker: {
-    marginBottom: 12, // odstęp między pickerami
+  input: {
+    backgroundColor: "#fafafa",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: "#000",
   },
-  button: {
-    marginTop: 8,
+  multiline: {
+    height: 80,
+    textAlignVertical: "top",
+  },
+  buttonWrapper: {
+    marginTop: 24,
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 16,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
   },
+  button: {
+    backgroundColor: "#10b981",
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  btn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  btnCancel: { backgroundColor: "#ef4444" },
+  btnSave: { backgroundColor: "#10b981" },
+  btnText: { color: "#fff", fontSize: 18 },
 })
 
 export default function AddEdit() {
   const { id } = useLocalSearchParams<{ id?: string }>()
   const router = useRouter()
   const [name, setName] = useState("")
-  const [date, setDate] = useState(new Date())
-  const [time, setTime] = useState("07:00")
+  const [dateStr, setDateStr] = useState(new Date().toISOString().split("T")[0]) //YYYY-MM-DD
+  const [timeStr, setTimeStr] = useState(
+    new Date().toISOString().substring(11, 16)
+  ) // HH:MM
   const [desc, setDesc] = useState("")
   const [existing, setExisting] = useState<Habit | null>(null)
 
@@ -84,48 +117,61 @@ export default function AddEdit() {
   //   }
 
   return (
-    <View className="p-4">
+    <View style={styles.container}>
+      <Text style={styles.label}>Habit name</Text>
       <TextInput
-        // className="border p-2 mb-2"
         style={styles.input}
-        placeholder="Name"
+        placeholder="Example: Mornign walk"
         value={name}
         onChangeText={setName}
       />
-      {/* <DateTimePicker
-        mode="date"
-        value={date}
-        // onChange={(_event, selectedDate) => {
-        //   if (selectedDate) setDate(selectedDate)
-        // }}
-      />
-      <DateTimePicker
-        mode="time"
-        value={new Date()}
-        // onChange={(_event, selectedDate) => {
-        //   if (selectedDate) setTime(selectedDate.toTimeString().slice(0, 5))
-        // }}
-      /> */}
+      <Text style={styles.label}>Start date (YYYY-MM-DD):</Text>
       <TextInput
-        // className="border p-2 mb-4"
         style={styles.input}
-        placeholder="Description (opt.)"
+        placeholder="2025-06-24"
+        value={dateStr}
+        onChangeText={(text) => {
+          const filtered = text.replace(/[^0-9-]/g, "")
+          setDateStr(filtered)
+        }}
+        keyboardType="numeric"
+      />
+
+      <Text style={styles.label}>Start hour (HH:MM):</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="07:00"
+        value={timeStr}
+        onChangeText={(text) => {
+          const filtered = text.replace(/[^0-9-::]/g, "")
+          setTimeStr(filtered)
+        }}
+        keyboardType="numeric"
+      />
+      <Text style={styles.label}>Description</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Why do you want to do this?"
         value={desc}
         onChangeText={setDesc}
         multiline
       />
 
-      <View style={styles.button}>
-        <Button
-          title="Save"
-          onPress={alert.bind(null, "Save functionality not implemented yet")}
-          //           onPress={save}
-        />
-        <Button
-          title="Cancel"
+      <View style={styles.buttonWrapper}>
+        <TouchableOpacity
+          // onPress={onDelete}
           onPress={() => router.push("../")}
-          //           onPress={save}
-        />
+          style={[styles.btn, styles.btnCancel]}
+        >
+          <Text style={styles.btnText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          // onPress={onDelete}
+          onPress={alert.bind(null, "Save functionality not implemented yet")}
+          style={[styles.btn, styles.btnSave]}
+        >
+          <Text style={styles.btnText}>Save</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
