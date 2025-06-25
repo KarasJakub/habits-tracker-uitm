@@ -1,4 +1,4 @@
-// import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as FileSystem from 'expo-file-system'
 
 export interface Habit {
   id: string;
@@ -9,34 +9,26 @@ export interface Habit {
   checkedDates: string[];
 }
 
-// const KEY = 'HABITS';
+const HABITS_FILE = FileSystem.documentDirectory + 'habits.json';
 
-// export const loadHabits = async (): Promise<Habit[]> => {
-//   const json = await AsyncStorage.getItem(KEY);
-//   return json ? JSON.parse(json) : [];
-// };
+export const loadHabits = async (): Promise<Habit[]> => {
+  try {
+    const json = await FileSystem.readAsStringAsync(HABITS_FILE);
+    return JSON.parse(json);
+  } catch (e: any) {
+    if (e.code === 'ERR_FILE_NOT_FOUND' || e.code === 'ENOENT') {
+      return [];
+    }
+    console.warn('loadHabits error', e);
+    return [];
+  }
+};
 
-// export const saveHabits = async (habits: Habit[]) => {
-//   await AsyncStorage.setItem(KEY, JSON.stringify(habits));
-// };
-// import * as SecureStore from 'expo-secure-store'
-
-// export interface Habit {
-//   id: string;
-//   name: string;
-//   startDate: string;    // YYYY-MM-DD
-//   time: string;         // HH:mm
-//   description?: string;
-//   checkedDates: string[];
-// }
-
-// const KEY = 'HABITS';
-
-// export const loadHabits = async (): Promise<Habit[]> => {
-//   const json = await SecureStore.getItemAsync(KEY);
-//   return json ? JSON.parse(json) : [];
-// };
-
-// export const saveHabits = async (habits: Habit[]) => {
-//   await SecureStore.setItemAsync(KEY, JSON.stringify(habits));
-// };
+export const saveHabits = async (habits: Habit[]) => {
+  try {
+    const json = JSON.stringify(habits);
+    await FileSystem.writeAsStringAsync(HABITS_FILE, json, { encoding: FileSystem.EncodingType.UTF8 });
+  } catch (e) {
+    console.warn('saveHabits error', e);
+  }
+};

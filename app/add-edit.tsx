@@ -1,14 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native"
-// import uuid from "react-native-uuid"
-import { Habit } from "../storage/habitsStorage"
+import uuid from "react-native-uuid"
+import { Habit, loadHabits, saveHabits } from "../storage/habitsStorage"
 
 const styles = StyleSheet.create({
   container: {
@@ -76,52 +77,64 @@ export default function AddEdit() {
   const [desc, setDesc] = useState("")
   const [existing, setExisting] = useState<Habit | null>(null)
 
-  //   useEffect(() => {
-  //     if (id) {
-  //       loadHabits().then((hs) => {
-  //         const h = hs.find((x) => x.id === id)
-  //         if (h) {
-  //           setExisting(h)
-  //           setName(h.name)
-  //           setDate(new Date(h.startDate))
-  //           setTime(h.time)
-  //           setDesc(h.description || "")
-  //         }
-  //       })
-  //     }
-  //   }, [id])
+  useEffect(() => {
+    if (id) {
+      loadHabits().then((hs) => {
+        const h = hs.find((x: { id: string }) => x.id === id)
+        if (h) {
+          setExisting(h)
+          setName(h.name)
+          setDateStr(h.startDate)
+          setTimeStr(h.time)
+          setDesc(h.description || "")
+        }
+      })
+    }
+  }, [id])
 
-  //   const save = async () => {
-  //     const hs = await loadHabits()
-  //     const h: Habit = existing
-  //       ? {
-  //           ...existing,
-  //           name,
-  //           startDate: date.toISOString().split("T")[0],
-  //           time,
-  //           description: desc,
-  //         }
-  //       : {
-  //           id: uuid.v4() as string,
-  //           name,
-  //           startDate: date.toISOString().split("T")[0],
-  //           time,
-  //           description: desc,
-  //           checkedDates: [],
-  //         }
-  //     const updated = existing
-  //       ? hs.map((x) => (x.id === existing.id ? h : x))
-  //       : [...hs, h]
-  //     await saveHabits(updated)
-  //     router.back()
-  //   }
+  const onSave = async () => {
+    if (!name.trim()) {
+      Alert.alert("Błąd", "Musisz podać nazwę nawyku")
+      return
+    }
+
+    try {
+      const hs = await loadHabits()
+      const habit: Habit = existing
+        ? {
+            ...existing,
+            name,
+            startDate: dateStr,
+            time: timeStr,
+            description: desc,
+          }
+        : {
+            id: uuid.v4() as string,
+            name,
+            startDate: dateStr,
+            time: timeStr,
+            description: desc,
+            checkedDates: [],
+          }
+
+      const updated = existing
+        ? hs.map((x: Habit) => (x.id === existing.id ? habit : x))
+        : [...hs, habit]
+
+      await saveHabits(updated)
+      router.back()
+    } catch (e) {
+      console.warn("saveHabits error", e)
+      Alert.alert("Błąd", "Nie udało się zapisać nawyku")
+    }
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Habit name</Text>
       <TextInput
         style={styles.input}
-        placeholder="Example: Mornign walk"
+        placeholder="Example: Morning walk"
         value={name}
         onChangeText={setName}
       />
@@ -166,8 +179,8 @@ export default function AddEdit() {
           <Text style={styles.btnText}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          // onPress={onDelete}
-          onPress={alert.bind(null, "Save functionality not implemented yet")}
+          onPress={onSave}
+          // onPress={alert.bind(null, "Save functionality not implemented yet")}
           style={[styles.btn, styles.btnSave]}
         >
           <Text style={styles.btnText}>Save</Text>

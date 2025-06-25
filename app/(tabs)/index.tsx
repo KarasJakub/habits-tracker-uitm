@@ -1,8 +1,9 @@
 import HabitCard from "@/components/ui/HabitCard"
-import { Habit } from "@/storage/habitsStorage"
+import { Habit, loadHabits, saveHabits } from "@/storage/habitsStorage"
 import { useRouter } from "expo-router"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -47,56 +48,57 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: "center",
   },
+  empty: { textAlign: "center", marginTop: 32, color: "#666" },
 })
-
-const habitss: Habit[] = [
-  {
-    id: "1",
-    name: "Morning walk",
-    startDate: "2023-10-01",
-    time: "07:00",
-    description: "To stay healthy",
-    checkedDates: ["2023-10-01", "2023-10-02"],
-  },
-  {
-    id: "2",
-    name: "Read a book",
-    startDate: "2023-10-01",
-    time: "20:00",
-    description: "To improve knowledge",
-    checkedDates: ["2023-10-01"],
-  },
-]
 
 export default function Home() {
   const [habits, setHabits] = useState<Habit[]>([])
   const router = useRouter()
 
-  // useEffect(() => {
-  //   loadHabits().then(setHabits)
-  // }, [])
+  useEffect(() => {
+    loadHabits()
+      .then(setHabits)
+      .catch((e) => {
+        console.warn("loadHabits error", e)
+        Alert.alert("Error", "Failed to load habits")
+      })
+  }, [])
 
-  // const persist = (newHabits: Habit[]) => {
-  //   setHabits(newHabits)
-  //   saveHabits(newHabits)
-  // }
+  const persist = async (newHabits: Habit[]) => {
+    setHabits(newHabits)
+    try {
+      await saveHabits(newHabits)
+    } catch (e) {
+      console.warn("saveHabits error", e)
+      Alert.alert("Error", "Failed to save habits")
+    }
+  }
 
-  // const toggle = (id: string) => {
-  //   const today = new Date().toISOString().split("T")[0]
-  //   const updated = habits.map((h) =>
-  //     h.id === id
-  //       ? {
-  //           ...h,
-  //           checkedDates: h.checkedDates.includes(today)
-  //             ? h.checkedDates.filter((d) => d !== today)
-  //             : [...h.checkedDates, today],
-  //         }
-  //       : h
-  //   )
-  //   persist(updated)
-  // }
+  const toggleCheck = (id: string) => {
+    const today = new Date().toISOString().split("T")[0]
+    const updated = habits.map((h) => {
+      if (h.id !== id) return h
+      const done = h.checkedDates.includes(today)
+      return {
+        ...h,
+        checkedDates: done
+          ? h.checkedDates.filter((d) => d !== today)
+          : [...h.checkedDates, today],
+      }
+    })
+    persist(updated)
+  }
 
-  // const remove = (id: string) => persist(habits.filter((h) => h.id !== id))
+  const deleteHabit = (id: string) => {
+    Alert.alert("Delete habit", "Are you sure you want delete this habit?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => persist(habits.filter((h) => h.id !== id)),
+      },
+    ])
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -106,25 +108,23 @@ export default function Home() {
           keyExtractor={(h) => h.id}
           renderItem={({ item }) => (
             <HabitCard
-            //  habit={item}
-            // onCheck={() => toggle(item.id)}
-            // onEdit={() =>
-            //   router.push({ pathname: "../add-edit", params: { id: item.id } })
-            // }
-            // onDelete={() => remove(item.id)}
+              habit={item}
+              onCheck={() => toggleCheck(item.id)}
+              onEdit={() =>
+                router.push({
+                  pathname: "/add-edit",
+                  params: { id: item.id },
+                })
+              }
+              onDelete={() => deleteHabit(item.id)}
             />
           )}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              You did not already created any habit
+            </Text>
+          }
         />
-
-        {habitss.map((habit) => (
-          <HabitCard
-            key={habit.id}
-            habit={habit}
-            // onCheck={() => toggle(habit.id)}
-            // onEdit={() => router.push({ pathname: "../add-edit", params: { id: habit.id } })}
-            // onDelete={() => remove(habit.id)}
-          />
-        ))}
       </View>
       <TouchableOpacity
         style={styles.addBtn}
