@@ -1,12 +1,11 @@
-// import { Habit } from "@/storage/habitsStorage"
-import React, { useState } from "react"
+import React from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 interface Habit {
   id: string
   name: string
-  startDate: string // YYYY-MM-DD
-  time: string // HH:mm
+  startDate: string
+  time: string
   description?: string
   checkedDates: string[]
 }
@@ -16,6 +15,11 @@ interface Props {
   onCheck?: () => void
   onEdit?: () => void
   onDelete?: () => void
+}
+
+const formatDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("-")
+  return `${day}.${month}.${year}`
 }
 
 const styles = StyleSheet.create({
@@ -29,8 +33,9 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  title: { fontSize: 18, fontWeight: "bold" },
-  sub: { color: "#666", marginVertical: 4 },
+  title: { fontSize: 20, fontWeight: "bold" },
+  subTitle: { fontSize: 14, fontWeight: "bold", marginTop: 4 },
+  description: { color: "#666", marginVertical: 4 },
   row: { flexDirection: "row", marginTop: 8 },
   btn: {
     paddingVertical: 6,
@@ -42,17 +47,39 @@ const styles = StyleSheet.create({
   btnEdit: { backgroundColor: "#facc15" },
   btnDel: { backgroundColor: "#ef4444" },
   btnText: { color: "#fff" },
+  label: {
+    marginTop: 12,
+    marginLeft: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
 })
 
 export default function HabitCard({ habit, onCheck, onEdit, onDelete }: Props) {
-  const [habits, setHabits] = useState<Habit[]>([])
   const today = new Date().toISOString().split("T")[0]
   const done = habit?.checkedDates.includes(today)
 
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{habit?.name}</Text>
-      <Text style={styles.sub}>{habit?.time}</Text>
+      <Text style={styles.subTitle}>Why am I doing it?</Text>
+      {!!habit?.description && (
+        <Text style={styles.description}>{habit.description}</Text>
+      )}
+      <Text style={styles.description}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "bold",
+            marginTop: 4,
+            color: "#000",
+          }}
+        >
+          Habit start date:{" "}
+        </Text>
+        {formatDate(habit?.startDate as string)} {habit?.time}
+      </Text>
       <View style={styles.row}>
         <TouchableOpacity
           onPress={onCheck}

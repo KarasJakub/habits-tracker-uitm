@@ -94,7 +94,7 @@ export default function AddEdit() {
 
   const onSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Błąd", "Musisz podać nazwę nawyku")
+      Alert.alert("Błąd", "You have to provide a habit name")
       return
     }
 
@@ -125,7 +125,7 @@ export default function AddEdit() {
       router.back()
     } catch (e) {
       console.warn("saveHabits error", e)
-      Alert.alert("Błąd", "Nie udało się zapisać nawyku")
+      Alert.alert("Błąd", "Failed to save habit")
     }
   }
 
@@ -172,17 +172,12 @@ export default function AddEdit() {
 
       <View style={styles.buttonWrapper}>
         <TouchableOpacity
-          // onPress={onDelete}
           onPress={() => router.push("../")}
           style={[styles.btn, styles.btnCancel]}
         >
           <Text style={styles.btnText}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onSave}
-          // onPress={alert.bind(null, "Save functionality not implemented yet")}
-          style={[styles.btn, styles.btnSave]}
-        >
+        <TouchableOpacity onPress={onSave} style={[styles.btn, styles.btnSave]}>
           <Text style={styles.btnText}>Save</Text>
         </TouchableOpacity>
       </View>

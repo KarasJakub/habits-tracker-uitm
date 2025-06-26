@@ -1,4 +1,3 @@
-// app/(tabs)/calendar.tsx
 import React, { useEffect, useState } from "react"
 import {
   Alert,
@@ -41,7 +40,7 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Filtruj nawyk:</Text>
+      <Text style={styles.label}>Select habit:</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -60,7 +59,7 @@ export default function CalendarScreen() {
               selectedId === null && styles.filterTextActive,
             ]}
           >
-            Wszystkie
+            All
           </Text>
         </TouchableOpacity>
 
