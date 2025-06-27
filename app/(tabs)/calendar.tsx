@@ -1,42 +1,12 @@
-import React, { useEffect, useState } from "react"
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native"
+import { CalendarViewStyles as styles } from "@/styles/CalendarViewStyles"
+import React from "react"
+import { ScrollView, Text, TouchableOpacity, View } from "react-native"
 import { Calendar } from "react-native-calendars"
-import { Habit, loadHabits } from "../../storage/habitsStorage"
+import { useCalendarInterface } from "../../hooks/useCalendarInterface"
 
 export default function CalendarScreen() {
-  const [markedDates, setMarkedDates] = useState<
-    Record<string, { marked: boolean }>
-  >({})
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [habits, setHabits] = useState<Habit[]>([])
-
-  useEffect(() => {
-    loadHabits()
-      .then(setHabits)
-      .catch((e) => {
-        console.warn("loadHabits error", e)
-        Alert.alert("Błąd", "Failed to load habits")
-      })
-  }, [])
-
-  useEffect(() => {
-    const marks: Record<string, { marked: boolean }> = {}
-    const list = selectedId ? habits.filter((h) => h.id === selectedId) : habits
-
-    list.forEach((h) => {
-      h.checkedDates.forEach((date) => {
-        marks[date] = { marked: true }
-      })
-    })
-    setMarkedDates(marks)
-  }, [selectedId, habits])
+  const { markedDates, selectedId, setSelectedId, habits } =
+    useCalendarInterface()
 
   return (
     <View style={styles.container}>
@@ -96,52 +66,3 @@ export default function CalendarScreen() {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-  },
-  label: {
-    marginTop: 12,
-    marginLeft: 16,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  buttonsScroll: {
-    maxHeight: 50,
-    marginVertical: 8,
-  },
-  buttonsRow: {
-    marginTop: 8,
-    paddingHorizontal: 16,
-    alignItems: "flex-start",
-  },
-  filterBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    marginRight: 8,
-  },
-  filterBtnActive: {
-    backgroundColor: "#10b981",
-  },
-  filterText: {
-    color: "#333",
-    fontSize: 14,
-  },
-  filterTextActive: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  calendarWrapper: {
-    margin: 16,
-    borderRadius: 8,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    overflow: "hidden",
-  },
-})
