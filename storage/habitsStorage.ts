@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as FileSystem from 'expo-file-system'
 
 export interface Habit {
   id: string;
@@ -9,13 +9,26 @@ export interface Habit {
   checkedDates: string[];
 }
 
-const KEY = 'HABITS';
+const HABITS_FILE = FileSystem.documentDirectory + 'habits.json';
 
 export const loadHabits = async (): Promise<Habit[]> => {
-  const json = await AsyncStorage.getItem(KEY);
-  return json ? JSON.parse(json) : [];
+  try {
+    const json = await FileSystem.readAsStringAsync(HABITS_FILE);
+    return JSON.parse(json);
+  } catch (e: any) {
+    if (e.code === 'ERR_FILE_NOT_FOUND' || e.code === 'ENOENT') {
+      return [];
+    }
+    console.warn('loadHabits error', e);
+    return [];
+  }
 };
 
 export const saveHabits = async (habits: Habit[]) => {
-  await AsyncStorage.setItem(KEY, JSON.stringify(habits));
+  try {
+    const json = JSON.stringify(habits);
+    await FileSystem.writeAsStringAsync(HABITS_FILE, json, { encoding: FileSystem.EncodingType.UTF8 });
+  } catch (e) {
+    console.warn('saveHabits error', e);
+  }
 };
